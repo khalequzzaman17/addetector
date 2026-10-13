@@ -19,5 +19,7 @@ assert(str_contains($html, 'data-abd-refresh'));
 assert(str_contains($html, 'checkBaitElement'));
 assert(str_contains($html, 'antiAdblockSelectors'));
 assert(str_contains($html, 'antiAdblockScriptPatterns'));
+assert(str_contains($html, 'minimumStrongSignals'));
+assert(str_contains($html, 'MutationObserver'));
 assert(!str_contains($html, 'chpadblock.com'));
 echo "OK\n";

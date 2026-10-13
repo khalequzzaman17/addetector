@@ -28,6 +28,8 @@ final class AdblockDetector
                 'periodicCheck' => $this->detector->periodicCheck,
                 'periodicIntervalMs' => $this->detector->periodicIntervalMs,
                 'requestTimeoutMs' => $this->detector->requestTimeoutMs,
+                'minimumStrongSignals' => $this->detector->minimumStrongSignals,
+                'observeDomChanges' => $this->detector->observeDomChanges,
                 'googleAdsUrl' => $this->detector->googleAdsUrl,
                 'knownMarkers' => array_values($this->detector->knownMarkers),
                 'antiAdblockSelectors' => array_values($this->detector->antiAdblockSelectors),
@@ -67,10 +69,30 @@ const antiAdblockSignature = () => c.detector.antiAdblockSelectors.some((selecto
 const antiAdblockScriptSignature = () => Array.from(d.scripts).some((script) => { const src = (script.src || '').toLowerCase(); return c.detector.antiAdblockScriptPatterns.some((pattern) => src.includes(pattern.toLowerCase())); });
 const baitBlocked = () => { if (!c.detector.checkBaitElement) return false; const bait = d.createElement('div'); bait.className = c.detector.baitClasses.join(' '); bait.setAttribute('aria-hidden','true'); bait.style.cssText = 'position:absolute!important;left:-10000px!important;top:-10000px!important;width:1px!important;height:1px!important;'; (d.body || d.documentElement).appendChild(bait); const blocked = bait.offsetHeight === 0 || bait.offsetWidth === 0 || getComputedStyle(bait).display === 'none' || getComputedStyle(bait).visibility === 'hidden'; bait.remove(); return blocked; };
 const googleBlocked = () => new Promise((resolve) => { if (!c.detector.checkGoogleAds || !navigator.onLine) return resolve(false); const tag = d.createElement('script'); let settled = false; const finish = (value) => { if (settled) return; settled = true; tag.remove(); resolve(value); }; const timer = w.setTimeout(() => finish(true), c.detector.requestTimeoutMs); tag.onload = () => { w.clearTimeout(timer); finish(typeof w.adsbygoogle === 'undefined'); }; tag.onerror = () => { w.clearTimeout(timer); finish(true); }; tag.src = c.detector.googleAdsUrl; tag.async = true; (d.head || d.documentElement).appendChild(tag); });
-const check = async () => { if (markerBlocked() || antiAdblockSignature() || antiAdblockScriptSignature()) return show(); if (await googleBlocked()) return show(); if (baitBlocked()) return show(); hide(); };
+let checking = false;
+const check = async () => {
+  if (checking) return;
+  checking = true;
+  observer?.disconnect();
+  try {
+    const signals = [];
+    if (markerBlocked()) signals.push('marker');
+    const [network, bait] = await Promise.all([googleBlocked(), Promise.resolve(baitBlocked())]);
+    if (network) signals.push('network');
+    if (bait) signals.push('bait');
+    const weakSignal = antiAdblockSignature() || antiAdblockScriptSignature();
+    const strongCount = signals.length;
+    if (strongCount >= c.detector.minimumStrongSignals || (strongCount >= 1 && weakSignal)) show();
+    else hide();
+  } finally {
+    checking = false;
+    observer?.observe(d.documentElement, {childList:true, subtree:true});
+  }
+};
 root.querySelector('[data-abd-refresh]')?.addEventListener('click', () => w.location.reload());
 root.querySelector('[data-abd-close]')?.addEventListener('click', hide);
-const boot = () => { check(); if (c.detector.periodicCheck) w.setInterval(check, c.detector.periodicIntervalMs); };
+let observer;
+const boot = () => { check(); if (c.detector.periodicCheck) w.setInterval(check, c.detector.periodicIntervalMs); if (c.detector.observeDomChanges && w.MutationObserver) { observer = new MutationObserver(() => { if (!shown) check(); }); observer.observe(d.documentElement, {childList:true, subtree:true}); } };
 if (c.detector.checkOnDomReady && d.readyState === 'loading') d.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
 JS;
         return preg_replace('/\s+/', ' ', trim($run)) ?? $run;

@@ -15,6 +15,8 @@ final class DetectorConfig
         public readonly bool $periodicCheck = false,
         public readonly int $periodicIntervalMs = 30000,
         public readonly int $requestTimeoutMs = 4000,
+        public readonly int $minimumStrongSignals = 2,
+        public readonly bool $observeDomChanges = true,
         public readonly string $googleAdsUrl = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
         public readonly array $knownMarkers = ['stndz-style'],
         public readonly array $antiAdblockSelectors = [
@@ -39,6 +41,9 @@ final class DetectorConfig
         if ($this->requestTimeoutMs < 250) {
             throw new \InvalidArgumentException('requestTimeoutMs must be at least 250.');
         }
+        if ($this->minimumStrongSignals < 1 || $this->minimumStrongSignals > 3) {
+            throw new \InvalidArgumentException('minimumStrongSignals must be between 1 and 3.');
+        }
     }
 
     public function with(array $values): self
@@ -52,6 +57,8 @@ final class DetectorConfig
             'periodicCheck' => $this->periodicCheck,
             'periodicIntervalMs' => $this->periodicIntervalMs,
             'requestTimeoutMs' => $this->requestTimeoutMs,
+            'minimumStrongSignals' => $this->minimumStrongSignals,
+            'observeDomChanges' => $this->observeDomChanges,
             'googleAdsUrl' => $this->googleAdsUrl,
             'knownMarkers' => $this->knownMarkers,
             'antiAdblockSelectors' => $this->antiAdblockSelectors,

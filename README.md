@@ -1,6 +1,6 @@
 # khalequzzaman17/addetector
 
-Framework-agnostic, clean-room Composer package inspired by the public behavior of CHP Ads Block Detector. It detects likely ad-blocking with browser-side signals and renders a configurable notice. It also includes a small, opt-in-by-default heuristic set derived from the AakList anti-adblock filter list. It does not guarantee detection: extensions can hide network requests, spoof APIs, or bypass DOM probes.
+Framework-agnostic, clean-room Composer package inspired by the public behavior of CHP Ads Block Detector. It detects likely ad-blocking with browser-side signals and renders a configurable notice. It also includes a small heuristic set derived from the AakList anti-adblock filter list. Browser-side detection cannot be mathematically 100% reliable because the visitor controls the browser.
 
 ## Install
 
@@ -53,15 +53,16 @@ $this->app->singleton(AdblockDetector::class, fn () => new AdblockDetector(
 ## Core behavior
 
 1. Check known DOM markers used by some blockers.
-2. Check known anti-adblock DOM and script signatures derived from AakList.
+2. Check known anti-adblock DOM and script signatures derived from AakList as weak contextual signals.
 3. Optionally load the Google Ads script and treat an error/timeout or missing `window.adsbygoogle` as blocked.
 4. Add a bait element with ad-like classes and inspect its computed size/display.
-5. Show the modal once when a signal reports blocked; optionally re-check periodically.
-6. Include a no-JavaScript fallback when enabled.
+5. Require multiple independent strong signals by default before showing the modal.
+6. Observe dynamically inserted DOM and optionally re-check periodically.
+7. Include a no-JavaScript fallback when enabled.
 
 The implementation is deliberately independent of WordPress hooks, WordPress escaping helpers, original branding, original assets, and original obfuscation code.
 
-The AakList-derived checks are heuristics: seeing an anti-adblock signature means the page is participating in anti-adblock behavior, but is not definitive proof that a blocker is enabled. Disable those checks by passing empty `antiAdblockSelectors` and `antiAdblockScriptPatterns` arrays if a site has false positives.
+The AakList-derived checks are weak heuristics: seeing an anti-adblock signature means the page is participating in anti-adblock behavior, but is not definitive proof that a blocker is enabled. By default, one strong signal plus one weak signal or two strong signals are required. Tune `minimumStrongSignals` and disable the AakList checks with empty `antiAdblockSelectors` and `antiAdblockScriptPatterns` arrays if a site has false positives.
 
 ## Reverse-engineering notes
 
