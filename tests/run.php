@@ -18,5 +18,6 @@ assert(str_contains($html, 'Test &lt;title&gt;'));
 assert(str_contains($html, 'data-abd-refresh'));
 assert(str_contains($html, 'checkBaitElement'));
 assert(str_contains($html, 'antiAdblockSelectors'));
+assert(str_contains($html, 'antiAdblockScriptPatterns'));
 assert(!str_contains($html, 'chpadblock.com'));
 echo "OK\n";

@@ -18,8 +18,15 @@ final class DetectorConfig
         public readonly string $googleAdsUrl = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
         public readonly array $knownMarkers = ['stndz-style'],
         public readonly array $antiAdblockSelectors = [
-            '.deadblocker-header-bar', '#adblock-message', '.adblock-message',
-            '.adblock-warning', '#adblock_layer', '.no-ad', '.afs_ads',
+            '#adblock-message', '.adblock-message', '.adblock-warning', '#adblock_layer',
+            '.deadblocker-header-bar', '.afs_ads', '.no-ad', '.box_error', '.box-error',
+            '.adblock-notice', '#adblockplus', '.adblock-msg',
+        ],
+        public readonly array $antiAdblockScriptPatterns = [
+            'adblock-detector', 'adblockchecker', 'adblockbait', 'antiadblock',
+            'blockadblock', 'fuckadblock', 'blockcake.js', 'anti-ad-buster.js',
+            'jquery.adblock.js', 'jquery.antiadsblock.js', 'adblockpopup.js',
+            'adblock_notify.js', 'adblock_detection', 'adblockdetect',
         ],
         public readonly array $baitClasses = [
             'adsbygoogle', 'ad-container', 'sidebar-ad', 'ad-slot', 'ads',
@@ -48,6 +55,7 @@ final class DetectorConfig
             'googleAdsUrl' => $this->googleAdsUrl,
             'knownMarkers' => $this->knownMarkers,
             'antiAdblockSelectors' => $this->antiAdblockSelectors,
+            'antiAdblockScriptPatterns' => $this->antiAdblockScriptPatterns,
             'baitClasses' => $this->baitClasses,
         ], $values));
     }

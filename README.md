@@ -53,13 +53,15 @@ $this->app->singleton(AdblockDetector::class, fn () => new AdblockDetector(
 ## Core behavior
 
 1. Check known DOM markers used by some blockers.
-2. Check known anti-adblock DOM signatures from AakList.
+2. Check known anti-adblock DOM and script signatures derived from AakList.
 3. Optionally load the Google Ads script and treat an error/timeout or missing `window.adsbygoogle` as blocked.
 4. Add a bait element with ad-like classes and inspect its computed size/display.
 5. Show the modal once when a signal reports blocked; optionally re-check periodically.
 6. Include a no-JavaScript fallback when enabled.
 
 The implementation is deliberately independent of WordPress hooks, WordPress escaping helpers, original branding, original assets, and original obfuscation code.
+
+The AakList-derived checks are heuristics: seeing an anti-adblock signature means the page is participating in anti-adblock behavior, but is not definitive proof that a blocker is enabled. Disable those checks by passing empty `antiAdblockSelectors` and `antiAdblockScriptPatterns` arrays if a site has false positives.
 
 ## Reverse-engineering notes
 
