@@ -1,2 +1,4 @@
 /vendor/
 /research/
+.phpunit.cache/
+.phpunit.result.cache
